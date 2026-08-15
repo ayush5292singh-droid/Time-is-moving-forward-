@@ -3,22 +3,14 @@
 
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KeyVault AI</title>
-
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <!-- =========================
-       LOCK SCREEN
-  ========================== -->
+  <!-- LOCK SCREEN -->
 
   <div id="lockScreen" class="lock-screen">
 
@@ -55,9 +47,7 @@
   </div>
 
 
-  <!-- =========================
-       MAIN APP
-  ========================== -->
+  <!-- MAIN APP -->
 
   <div id="mainApp" class="main-app">
 
@@ -92,26 +82,22 @@
 
     <section class="welcome">
 
-      <div>
+      <p class="small-text">
+        SECURE DASHBOARD
+      </p>
 
-        <p class="small-text">
-          SECURE DASHBOARD
-        </p>
+      <h1>
+        Welcome back 👋
+      </h1>
 
-        <h1>
-          Welcome back 👋
-        </h1>
-
-        <p>
-          Manage your API keys and developer credentials.
-        </p>
-
-      </div>
+      <p>
+        Manage your API keys and developer credentials.
+      </p>
 
     </section>
 
 
-    <!-- STAT CARDS -->
+    <!-- STATS -->
 
     <section class="stats">
 
@@ -122,13 +108,9 @@
         </div>
 
         <div>
-
           <span>API KEYS</span>
-
-          <strong>0</strong>
-
+          <strong id="keyCount">0</strong>
           <small>Stored keys</small>
-
         </div>
 
       </div>
@@ -141,13 +123,9 @@
         </div>
 
         <div>
-
           <span>BALANCE</span>
-
           <strong>$0.00</strong>
-
           <small>Available credits</small>
-
         </div>
 
       </div>
@@ -160,13 +138,9 @@
         </div>
 
         <div>
-
           <span>USAGE</span>
-
           <strong>0%</strong>
-
           <small>This month</small>
-
         </div>
 
       </div>
@@ -190,7 +164,10 @@
 
       <div class="actions">
 
-        <button class="action-card">
+        <button
+          class="action-card"
+          onclick="openAddKey()"
+        >
 
           <div class="action-icon">
             ➕
@@ -204,7 +181,10 @@
         </button>
 
 
-        <button class="action-card">
+        <button
+          class="action-card"
+          onclick="showKeys()"
+        >
 
           <div class="action-icon">
             🔍
@@ -218,7 +198,10 @@
         </button>
 
 
-        <button class="action-card">
+        <button
+          class="action-card"
+          onclick="showBalance()"
+        >
 
           <div class="action-icon">
             💰
@@ -232,7 +215,10 @@
         </button>
 
 
-        <button class="action-card">
+        <button
+          class="action-card"
+          onclick="showSettings()"
+        >
 
           <div class="action-icon">
             ⚙️
@@ -250,40 +236,41 @@
     </section>
 
 
-    <!-- API PROVIDERS -->
+    <!-- API KEYS -->
 
-    <section class="providers-section">
+    <section id="keysSection">
 
       <div class="section-title">
 
         <div>
-          <h2>Supported Providers</h2>
-          <p>Your API ecosystem</p>
+          <h2>My API Keys</h2>
+          <p>Your stored credentials</p>
         </div>
 
       </div>
 
+      <div id="keysContainer">
 
-      <div class="providers">
+        <div class="empty-vault">
 
-        <div class="provider">
-          <div class="provider-logo">O</div>
-          <span>OpenAI</span>
-        </div>
+          <div class="empty-icon">
+            🔑
+          </div>
 
-        <div class="provider">
-          <div class="provider-logo">G</div>
-          <span>Gemini</span>
-        </div>
+          <h2>Your vault is empty</h2>
 
-        <div class="provider">
-          <div class="provider-logo">A</div>
-          <span>Anthropic</span>
-        </div>
+          <p>
+            Add your first API key to start managing
+            your developer credentials.
+          </p>
 
-        <div class="provider">
-          <div class="provider-logo">+</div>
-          <span>More</span>
+          <button
+            class="primary-button"
+            onclick="openAddKey()"
+          >
+            + Add Your First API Key
+          </button>
+
         </div>
 
       </div>
@@ -291,23 +278,61 @@
     </section>
 
 
-    <!-- EMPTY VAULT -->
+    <!-- ADD KEY PANEL -->
 
-    <section class="empty-vault">
+    <section
+      id="addKeyPanel"
+      class="empty-vault"
+      style="display:none;"
+    >
 
-      <div class="empty-icon">
-        🔑
-      </div>
-
-      <h2>Your vault is empty</h2>
+      <h2>🔑 Add API Key</h2>
 
       <p>
-        Add your first API key to start managing
-        your developer credentials.
+        Add a credential to your local vault.
       </p>
 
-      <button class="primary-button">
-        + Add Your First API Key
+      <br>
+
+      <input
+        id="providerInput"
+        type="text"
+        placeholder="Provider e.g. OpenAI"
+        style="letter-spacing:0;"
+      >
+
+      <br><br>
+
+      <input
+        id="keyNameInput"
+        type="text"
+        placeholder="Key name"
+        style="letter-spacing:0;"
+      >
+
+      <br><br>
+
+      <input
+        id="apiKeyInput"
+        type="password"
+        placeholder="API key"
+        style="letter-spacing:2px;"
+      >
+
+      <br>
+
+      <button
+        class="primary-button"
+        onclick="saveKey()"
+      >
+        💾 Save Key
+      </button>
+
+      <button
+        class="primary-button"
+        onclick="closeAddKey()"
+      >
+        Cancel
       </button>
 
     </section>
@@ -317,22 +342,34 @@
 
     <nav class="bottom-nav">
 
-      <button class="nav-item active">
+      <button
+        class="nav-item active"
+        onclick="goHome()"
+      >
         <span>⌂</span>
         Home
       </button>
 
-      <button class="nav-item">
+      <button
+        class="nav-item"
+        onclick="showKeys()"
+      >
         <span>🔑</span>
         Keys
       </button>
 
-      <button class="nav-item">
+      <button
+        class="nav-item"
+        onclick="showBalance()"
+      >
         <span>💰</span>
         Balance
       </button>
 
-      <button class="nav-item">
+      <button
+        class="nav-item"
+        onclick="showSettings()"
+      >
         <span>⚙️</span>
         Settings
       </button>
