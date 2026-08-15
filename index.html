@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KeyVault AI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div id="lockScreen" class="lock-screen">
+
+    <div class="lock-card">
+
+      <div class="lock-icon">🔐</div>
+
+      <h1>KeyVault <span>AI</span></h1>
+
+      <p>Your secure API key vault</p>
+
+      <div class="status">🔴 VAULT LOCKED</div>
+
+      <label>Enter PIN</label>
+
+      <input
+        id="pinInput"
+        type="password"
+        inputmode="numeric"
+        maxlength="4"
+        placeholder="••••"
+      >
+
+      <div id="error"></div>
+
+      <button onclick="unlock()">🔓 Unlock Vault</button>
+
+    </div>
+
+  </div>
+
+
+  <div id="mainApp" class="main-app">
+
+    <h1>KeyVault AI</h1>
+    <p>🔑 API Key Manager</p>
+
+  </div>
+
+
+  <script src="script.js"></script>
+
+</body>
+</html>
