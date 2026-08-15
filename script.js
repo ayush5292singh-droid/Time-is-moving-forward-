@@ -1,373 +1,225 @@
 const PIN = "7890";
 
-let apiKeys = JSON.parse(
-  localStorage.getItem("keyvault_keys") || "[]"
+let keys = JSON.parse(
+  localStorage.getItem("keyvaultKeys") || "[]"
 );
 
 
-/* =========================
-   PIN SYSTEM
-========================= */
+/* PIN */
 
 function unlock() {
 
-  const entered =
-    document.getElementById("pinInput").value;
+  const pin = document.getElementById("pin").value;
 
-  const error =
-    document.getElementById("error");
+  if (pin === PIN) {
 
-  if (entered === PIN) {
+    document.getElementById("lockScreen").style.display = "none";
+    document.getElementById("app").style.display = "block";
 
-    error.textContent = "";
-
-    document.getElementById("lockScreen")
-      .style.display = "none";
-
-    document.getElementById("mainApp")
-      .style.display = "block";
-
-    updateKeyCount();
     renderKeys();
 
   } else {
 
-    error.textContent =
+    document.getElementById("pinError").textContent =
       "Incorrect PIN";
 
-    document.getElementById("pinInput")
-      .value = "";
-
+    document.getElementById("pin").value = "";
   }
 }
 
 
 function lockVault() {
 
-  document.getElementById("mainApp")
-    .style.display = "none";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("lockScreen").style.display = "flex";
 
-  document.getElementById("lockScreen")
-    .style.display = "flex";
-
-  document.getElementById("pinInput")
-    .value = "";
-
+  document.getElementById("pin").value = "";
 }
 
 
-/* =========================
-   ADD KEY
-========================= */
+/* ADD */
 
-function openAddKey() {
+function openAdd() {
+  document.getElementById("addBox").style.display = "block";
 
-  document.getElementById("addKeyPanel")
-    .style.display = "block";
-
-  document.getElementById("addKeyPanel")
-    .scrollIntoView({
-      behavior: "smooth"
-    });
+  document.getElementById("addBox").scrollIntoView({
+    behavior: "smooth"
+  });
 }
 
 
-function closeAddKey() {
-
-  document.getElementById("addKeyPanel")
-    .style.display = "none";
-
+function closeAdd() {
+  document.getElementById("addBox").style.display = "none";
 }
 
 
 function saveKey() {
 
   const provider =
-    document.getElementById("providerInput")
-      .value.trim();
+    document.getElementById("provider").value.trim();
 
   const name =
-    document.getElementById("keyNameInput")
-      .value.trim();
+    document.getElementById("keyName").value.trim();
 
   const key =
-    document.getElementById("apiKeyInput")
-      .value.trim();
+    document.getElementById("apiKey").value.trim();
 
   if (!provider || !name || !key) {
-
     alert("Please fill all fields.");
-
     return;
   }
 
-  const newKey = {
-
+  keys.push({
     id: Date.now(),
-
     provider: provider,
-
     name: name,
-
     key: key
-
-  };
-
-  apiKeys.push(newKey);
+  });
 
   localStorage.setItem(
-    "keyvault_keys",
-    JSON.stringify(apiKeys)
+    "keyvaultKeys",
+    JSON.stringify(keys)
   );
 
-  document.getElementById("providerInput")
-    .value = "";
+  document.getElementById("provider").value = "";
+  document.getElementById("keyName").value = "";
+  document.getElementById("apiKey").value = "";
 
-  document.getElementById("keyNameInput")
-    .value = "";
-
-  document.getElementById("apiKeyInput")
-    .value = "";
-
-  closeAddKey();
-
-  updateKeyCount();
-
+  closeAdd();
   renderKeys();
 
-  alert("✅ API key saved.");
-
+  alert("✅ API key saved!");
 }
 
 
-/* =========================
-   DISPLAY KEYS
-========================= */
+/* DISPLAY */
 
 function renderKeys() {
 
   const container =
-    document.getElementById("keysContainer");
+    document.getElementById("keys");
 
-  if (apiKeys.length === 0) {
+  document.getElementById("count").textContent =
+    keys.length;
 
-    container.innerHTML = `
+  if (keys.length === 0) {
 
-      <div class="empty-vault">
-
-        <div class="empty-icon">
-          🔑
-        </div>
-
-        <h2>Your vault is empty</h2>
-
-        <p>
-          Add your first API key.
-        </p>
-
-        <button
-          class="primary-button"
-          onclick="openAddKey()"
-        >
-          + Add API Key
-        </button>
-
-      </div>
-
-    `;
+    container.innerHTML =
+      "<p style='color:#777f96;'>No API keys yet.</p>";
 
     return;
   }
 
-
   container.innerHTML = "";
 
-
-  apiKeys.forEach(item => {
+  keys.forEach(item => {
 
     const card =
       document.createElement("div");
 
-    card.className = "stat-card";
-
-    card.style.marginBottom = "15px";
+    card.className = "keyCard";
 
     card.innerHTML = `
+      <div>🔑</div>
 
-      <div class="stat-icon purple">
-        🔑
-      </div>
+      <div class="keyInfo">
 
-      <div style="flex:1;">
+        <small>${safe(item.provider)}</small>
 
-        <span>
-          ${escapeHTML(item.provider)}
-        </span>
+        <b>${safe(item.name)}</b>
 
-        <strong>
-          ${escapeHTML(item.name)}
-        </strong>
-
-        <small id="key-${item.id}">
+        <div class="keyValue"
+             id="value-${item.id}">
           ••••••••••••••••
-        </small>
+        </div>
 
       </div>
 
-      <div>
+      <div class="keyActions">
 
-        <button
-          onclick="revealKey(${item.id})"
-          style="margin-right:5px;"
-        >
+        <button onclick="revealKey(${item.id})">
           👁️
         </button>
 
-        <button
-          onclick="copyKey(${item.id})"
-          style="margin-right:5px;"
-        >
+        <button onclick="copyKey(${item.id})">
           📋
         </button>
 
-        <button
-          onclick="deleteKey(${item.id})"
-        >
+        <button onclick="deleteKey(${item.id})">
           🗑️
         </button>
 
       </div>
-
     `;
 
     container.appendChild(card);
-
   });
-
 }
 
 
-/* =========================
-   REVEAL
-========================= */
+/* REVEAL */
 
 function revealKey(id) {
 
-  const item =
-    apiKeys.find(key => key.id === id);
+  const item = keys.find(k => k.id === id);
 
   const element =
-    document.getElementById(`key-${id}`);
+    document.getElementById("value-" + id);
 
-  if (!item || !element) return;
+  if (element.textContent.includes("•")) {
 
-
-  if (element.dataset.revealed === "true") {
-
-    element.textContent =
-      "••••••••••••••••";
-
-    element.dataset.revealed = "false";
+    element.textContent = item.key;
 
   } else {
 
-    element.textContent =
-      item.key;
-
-    element.dataset.revealed = "true";
-
+    element.textContent = "••••••••••••••••";
   }
-
 }
 
 
-/* =========================
-   COPY
-========================= */
+/* COPY */
 
 async function copyKey(id) {
 
-  const item =
-    apiKeys.find(key => key.id === id);
-
-  if (!item) return;
-
+  const item = keys.find(k => k.id === id);
 
   try {
 
-    await navigator.clipboard.writeText(
-      item.key
-    );
+    await navigator.clipboard.writeText(item.key);
 
-    alert("✅ API key copied.");
+    alert("✅ Key copied!");
 
   } catch {
 
-    alert(
-      "Clipboard access was blocked by the browser."
-    );
-
+    alert("Could not copy the key.");
   }
-
 }
 
 
-/* =========================
-   DELETE
-========================= */
+/* DELETE */
 
 function deleteKey(id) {
 
-  const confirmDelete =
-    confirm(
-      "Delete this API key?"
-    );
+  if (!confirm("Delete this API key?")) return;
 
-  if (!confirmDelete) return;
-
-
-  apiKeys =
-    apiKeys.filter(
-      key => key.id !== id
-    );
-
+  keys = keys.filter(k => k.id !== id);
 
   localStorage.setItem(
-    "keyvault_keys",
-    JSON.stringify(apiKeys)
+    "keyvaultKeys",
+    JSON.stringify(keys)
   );
 
-
-  updateKeyCount();
-
   renderKeys();
-
 }
 
 
-/* =========================
-   KEY COUNT
-========================= */
-
-function updateKeyCount() {
-
-  document.getElementById("keyCount")
-    .textContent = apiKeys.length;
-
-}
-
-
-/* =========================
-   NAVIGATION
-========================= */
+/* NAVIGATION */
 
 function goHome() {
-
   window.scrollTo({
     top: 0,
     behavior: "smooth"
   });
-
 }
 
 
@@ -377,39 +229,26 @@ function showKeys() {
     .scrollIntoView({
       behavior: "smooth"
     });
-
 }
 
 
 function showBalance() {
-
-  alert(
-    "💰 Balance & usage will be built in Part 5."
-  );
-
+  alert("💰 Balance system comes in Part 5.");
 }
 
 
 function showSettings() {
-
-  alert(
-    "⚙️ Settings will be built in Part 8."
-  );
-
+  alert("⚙️ Settings will come later.");
 }
 
 
-/* =========================
-   SAFETY
-========================= */
+/* SAFETY */
 
-function escapeHTML(text) {
+function safe(text) {
 
-  const div =
-    document.createElement("div");
+  const div = document.createElement("div");
 
   div.textContent = text;
 
   return div.innerHTML;
-
 }
