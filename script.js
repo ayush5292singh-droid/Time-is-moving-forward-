@@ -1,254 +1,693 @@
-const PIN = "7890";
+/* =========================
+   SETTINGS
+========================= */
 
-let keys = JSON.parse(
-  localStorage.getItem("keyvaultKeys") || "[]"
+const CORRECT_PIN = "7890";
+
+let apiKeys = [];
+
+
+/* =========================
+   LOAD SAVED KEYS
+========================= */
+
+try {
+
+  apiKeys =
+    JSON.parse(
+      localStorage.getItem("keyvault_api_keys")
+    ) || [];
+
+} catch {
+
+  apiKeys = [];
+
+}
+
+
+/* =========================
+   WAIT FOR PAGE
+========================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+
+    /* UNLOCK BUTTON */
+
+    document
+      .getElementById("unlockButton")
+      .addEventListener(
+        "click",
+        unlockVault
+      );
+
+
+    /* ENTER KEY */
+
+    document
+      .getElementById("pinInput")
+      .addEventListener(
+        "keydown",
+        function (event) {
+
+          if (event.key === "Enter") {
+
+            unlockVault();
+
+          }
+
+        }
+      );
+
+
+    /* LOCK BUTTON */
+
+    document
+      .getElementById("lockButton")
+      .addEventListener(
+        "click",
+        lockVault
+      );
+
+
+    /* ADD KEY */
+
+    document
+      .getElementById("addKeyButton")
+      .addEventListener(
+        "click",
+        openAddKey
+      );
+
+
+    /* KEYS */
+
+    document
+      .getElementById("keysButton")
+      .addEventListener(
+        "click",
+        showKeys
+      );
+
+
+    /* BALANCE */
+
+    document
+      .getElementById("balanceButton")
+      .addEventListener(
+        "click",
+        showBalance
+      );
+
+
+    /* SETTINGS */
+
+    document
+      .getElementById("settingsButton")
+      .addEventListener(
+        "click",
+        showSettings
+      );
+
+
+    /* SAVE */
+
+    document
+      .getElementById("saveKeyButton")
+      .addEventListener(
+        "click",
+        saveKey
+      );
+
+
+    /* CANCEL */
+
+    document
+      .getElementById("cancelKeyButton")
+      .addEventListener(
+        "click",
+        closeAddKey
+      );
+
+
+    /* NAVIGATION */
+
+    document
+      .getElementById("homeNav")
+      .addEventListener(
+        "click",
+        goHome
+      );
+
+
+    document
+      .getElementById("keysNav")
+      .addEventListener(
+        "click",
+        showKeys
+      );
+
+
+    document
+      .getElementById("balanceNav")
+      .addEventListener(
+        "click",
+        showBalance
+      );
+
+
+    document
+      .getElementById("settingsNav")
+      .addEventListener(
+        "click",
+        showSettings
+      );
+
+
+    renderKeys();
+
+  }
 );
 
 
-/* PIN */
+/* =========================
+   UNLOCK
+========================= */
 
-function unlock() {
+function unlockVault() {
 
-  const pin = document.getElementById("pin").value;
+  const pin =
+    document
+      .getElementById("pinInput")
+      .value;
 
-  if (pin === PIN) {
+  const error =
+    document
+      .getElementById("pinError");
 
-    document.getElementById("lockScreen").style.display = "none";
-    document.getElementById("app").style.display = "block";
+
+  if (pin === CORRECT_PIN) {
+
+    error.textContent = "";
+
+    document
+      .getElementById("lockScreen")
+      .style.display = "none";
+
+    document
+      .getElementById("mainApp")
+      .style.display = "block";
 
     renderKeys();
 
   } else {
 
-    document.getElementById("pinError").textContent =
-      "Incorrect PIN";
+    error.textContent =
+      "❌ Incorrect PIN";
 
-    document.getElementById("pin").value = "";
+    document
+      .getElementById("pinInput")
+      .value = "";
+
   }
+
 }
 
+
+/* =========================
+   LOCK
+========================= */
 
 function lockVault() {
 
-  document.getElementById("app").style.display = "none";
-  document.getElementById("lockScreen").style.display = "flex";
+  document
+    .getElementById("mainApp")
+    .style.display = "none";
 
-  document.getElementById("pin").value = "";
+  document
+    .getElementById("lockScreen")
+    .style.display = "flex";
+
+  document
+    .getElementById("pinInput")
+    .value = "";
+
+  document
+    .getElementById("pinError")
+    .textContent = "";
+
 }
 
 
-/* ADD */
+/* =========================
+   ADD KEY
+========================= */
 
-function openAdd() {
-  document.getElementById("addBox").style.display = "block";
+function openAddKey() {
 
-  document.getElementById("addBox").scrollIntoView({
+  const panel =
+    document
+      .getElementById("addKeyPanel");
+
+  panel.style.display = "block";
+
+  panel.scrollIntoView({
     behavior: "smooth"
   });
+
 }
 
 
-function closeAdd() {
-  document.getElementById("addBox").style.display = "none";
+function closeAddKey() {
+
+  document
+    .getElementById("addKeyPanel")
+    .style.display = "none";
+
 }
 
+
+/* =========================
+   SAVE KEY
+========================= */
 
 function saveKey() {
 
   const provider =
-    document.getElementById("provider").value.trim();
+    document
+      .getElementById("providerInput")
+      .value
+      .trim();
 
   const name =
-    document.getElementById("keyName").value.trim();
+    document
+      .getElementById("keyNameInput")
+      .value
+      .trim();
 
   const key =
-    document.getElementById("apiKey").value.trim();
+    document
+      .getElementById("apiKeyInput")
+      .value
+      .trim();
 
-  if (!provider || !name || !key) {
-    alert("Please fill all fields.");
+
+  if (
+    provider === "" ||
+    name === "" ||
+    key === ""
+  ) {
+
+    alert(
+      "Please fill all fields."
+    );
+
     return;
+
   }
 
-  keys.push({
+
+  const newKey = {
+
     id: Date.now(),
+
     provider: provider,
+
     name: name,
+
     key: key
-  });
+
+  };
+
+
+  apiKeys.push(newKey);
+
 
   localStorage.setItem(
-    "keyvaultKeys",
-    JSON.stringify(keys)
+    "keyvault_api_keys",
+    JSON.stringify(apiKeys)
   );
 
-  document.getElementById("provider").value = "";
-  document.getElementById("keyName").value = "";
-  document.getElementById("apiKey").value = "";
 
-  closeAdd();
+  document
+    .getElementById("providerInput")
+    .value = "";
+
+  document
+    .getElementById("keyNameInput")
+    .value = "";
+
+  document
+    .getElementById("apiKeyInput")
+    .value = "";
+
+
+  closeAddKey();
+
   renderKeys();
 
-  alert("✅ API key saved!");
 }
 
 
-/* DISPLAY */
+/* =========================
+   SHOW KEYS
+========================= */
 
 function renderKeys() {
 
   const container =
-    document.getElementById("keys");
+    document
+      .getElementById("keysContainer");
 
-  document.getElementById("count").textContent =
-    keys.length;
+  const count =
+    document
+      .getElementById("keyCount");
 
-  if (keys.length === 0) {
 
-    container.innerHTML =
-      "<p style='color:#777f96;'>No API keys yet.</p>";
+  count.textContent =
+    apiKeys.length;
 
-    return;
-  }
 
   container.innerHTML = "";
 
-  keys.forEach(item => {
 
-    const card =
-      document.createElement("div");
+  if (apiKeys.length === 0) {
 
-    card.className = "keyCard";
-
-    card.innerHTML = `
-      <div>🔑</div>
-
-      <div class="keyInfo">
-
-        <small>${safe(item.provider)}</small>
-
-        <b>${safe(item.name)}</b>
-
-        <div class="keyValue"
-             id="value-${item.id}">
-          ••••••••••••••••
-        </div>
-
-      </div>
-
-      <div class="keyActions">
-
-        <button onclick="revealKey(${item.id})">
-          👁️
-        </button>
-
-        <button onclick="copyKey(${item.id})">
-          📋
-        </button>
-
-        <button onclick="deleteKey(${item.id})">
-          🗑️
-        </button>
-
-      </div>
+    container.innerHTML = `
+      <p style="
+        color:#777f96;
+        padding:20px 0;
+      ">
+        🔐 No API keys saved yet.
+      </p>
     `;
 
-    container.appendChild(card);
-  });
+    return;
+
+  }
+
+
+  apiKeys.forEach(
+    function (item) {
+
+      const card =
+        document.createElement("div");
+
+      card.className =
+        "key-card";
+
+
+      card.innerHTML = `
+
+        <div style="font-size:28px;">
+          🔑
+        </div>
+
+        <div class="key-info">
+
+          <small>
+            ${escapeHTML(item.provider)}
+          </small>
+
+          <strong>
+            ${escapeHTML(item.name)}
+          </strong>
+
+          <div
+            class="key-value"
+            id="key-${item.id}"
+          >
+            ••••••••••••••••
+          </div>
+
+        </div>
+
+        <div class="key-actions">
+
+          <button
+            data-action="reveal"
+            data-id="${item.id}"
+          >
+            👁️
+          </button>
+
+          <button
+            data-action="copy"
+            data-id="${item.id}"
+          >
+            📋
+          </button>
+
+          <button
+            data-action="delete"
+            data-id="${item.id}"
+          >
+            🗑️
+          </button>
+
+        </div>
+
+      `;
+
+
+      container.appendChild(card);
+
+    }
+  );
+
 }
 
 
-/* REVEAL */
+/* =========================
+   KEY BUTTONS
+========================= */
+
+document.addEventListener(
+  "click",
+  function (event) {
+
+    const button =
+      event.target.closest(
+        "[data-action]"
+      );
+
+
+    if (!button) return;
+
+
+    const id =
+      Number(
+        button.dataset.id
+      );
+
+
+    const action =
+      button.dataset.action;
+
+
+    if (action === "reveal") {
+
+      revealKey(id);
+
+    }
+
+
+    if (action === "copy") {
+
+      copyKey(id);
+
+    }
+
+
+    if (action === "delete") {
+
+      deleteKey(id);
+
+    }
+
+  }
+);
+
+
+/* =========================
+   REVEAL
+========================= */
 
 function revealKey(id) {
 
-  const item = keys.find(k => k.id === id);
+  const item =
+    apiKeys.find(
+      function (key) {
+
+        return key.id === id;
+
+      }
+    );
+
 
   const element =
-    document.getElementById("value-" + id);
+    document.getElementById(
+      "key-" + id
+    );
 
-  if (element.textContent.includes("•")) {
 
-    element.textContent = item.key;
+  if (!item || !element) return;
+
+
+  if (
+    element.dataset.revealed === "true"
+  ) {
+
+    element.textContent =
+      "••••••••••••••••";
+
+    element.dataset.revealed =
+      "false";
 
   } else {
 
-    element.textContent = "••••••••••••••••";
+    element.textContent =
+      item.key;
+
+    element.dataset.revealed =
+      "true";
+
   }
+
 }
 
 
-/* COPY */
+/* =========================
+   COPY
+========================= */
 
 async function copyKey(id) {
 
-  const item = keys.find(k => k.id === id);
+  const item =
+    apiKeys.find(
+      function (key) {
+
+        return key.id === id;
+
+      }
+    );
+
+
+  if (!item) return;
+
 
   try {
 
-    await navigator.clipboard.writeText(item.key);
+    await navigator.clipboard.writeText(
+      item.key
+    );
 
-    alert("✅ Key copied!");
+    alert(
+      "✅ API key copied!"
+    );
 
   } catch {
 
-    alert("Could not copy the key.");
+    alert(
+      "Clipboard access was blocked."
+    );
+
   }
+
 }
 
 
-/* DELETE */
+/* =========================
+   DELETE
+========================= */
 
 function deleteKey(id) {
 
-  if (!confirm("Delete this API key?")) return;
+  const answer =
+    confirm(
+      "Delete this API key?"
+    );
 
-  keys = keys.filter(k => k.id !== id);
+
+  if (!answer) return;
+
+
+  apiKeys =
+    apiKeys.filter(
+      function (key) {
+
+        return key.id !== id;
+
+      }
+    );
+
 
   localStorage.setItem(
-    "keyvaultKeys",
-    JSON.stringify(keys)
+    "keyvault_api_keys",
+    JSON.stringify(apiKeys)
   );
 
+
   renderKeys();
+
 }
 
 
-/* NAVIGATION */
+/* =========================
+   NAVIGATION
+========================= */
 
 function goHome() {
+
   window.scrollTo({
     top: 0,
     behavior: "smooth"
   });
+
 }
 
 
 function showKeys() {
 
-  document.getElementById("keysSection")
+  document
+    .getElementById("keysSection")
     .scrollIntoView({
       behavior: "smooth"
     });
+
 }
 
 
 function showBalance() {
-  alert("💰 Balance system comes in Part 5.");
+
+  alert(
+    "💰 Balance will be built in Part 5."
+  );
+
 }
 
 
 function showSettings() {
-  alert("⚙️ Settings will come later.");
+
+  alert(
+    "⚙️ Settings will be built later."
+  );
+
 }
 
 
-/* SAFETY */
+/* =========================
+   ESCAPE TEXT
+========================= */
 
-function safe(text) {
+function escapeHTML(text) {
 
-  const div = document.createElement("div");
+  const div =
+    document.createElement("div");
 
   div.textContent = text;
 
   return div.innerHTML;
+
 }
